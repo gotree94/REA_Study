@@ -1,7 +1,5 @@
 # REA (Reverse Engineer Anything) 사용법 & 환경 설정 가이드
 
-https://youtu.be/tByhXkxDKDo
-
 > 참고 저장소: <https://github.com/morluto/rea>
 > 공식 사이트: <https://rea.tools/> · 가이드: <https://rea.tools/guides/> · 쇼케이스: <https://rea.tools/showcase/>
 > npm 패키지: `rea-agents`
@@ -559,7 +557,82 @@ rea uninstall --purge-data # 추가로 REA 캐시/상태(~/.rea) 제거
 
 ---
 
-## 13. 보안 · 면책
+## 13. 이미 만들어진 "AI 재구현" 프로그램 사례 (PhotoCraft · VectorCraft 등)
+
+> **"다른 사람들이 이미 만들어서 배포하고 있다"** 는 흐름의 대표 사례입니다.
+> 예: **포토크래프트(PhotoCraft) = Photoshop 대안**, **벡터크래프트(VectorCraft) = Illustrator 대안**.
+
+REA의 목표("대상 앱의 기능을 이해하고, 내 기술 스택으로 다시 구현")와 같은 방향으로, **AI 코딩 도구를 이용해 상용 프로그램을 클린룸(clean-room) 방식으로 재구현**한 오픈소스 프로젝트들이 이미 공개·배포되어 있습니다. 가장 대표적인 것이 **ArtCraft의 "Crafting Apps"** 스위트입니다.
+
+### 13.1 ArtCraft "Crafting Apps"란
+
+- **제작**: storyteller.ai 팀(리드 **Brandon Thomas**, 전 storyteller.ai CEO)과 커뮤니티.
+- **내용**: Adobe·Microsoft 상용 앱을 **Rust로 처음부터 직접** 클린룸 재구현한 무료·오픈소스 앱 모음(현재 13종).
+- **라이선스**: MIT / Apache-2.0 · 무료 · 계정·구독 불필요 · 100% 오프라인(텔레메트리 없음).
+- **기술**: Electron 없이 순수 네이티브 Rust + GPU(wgpu → Metal/Vulkan/DX12/WebGPU), WebAssembly로 브라우저에서도 실행.
+- **에이전트 친화**: 각 앱이 **CLI + MCP 서버 + JSON 컨트롤 채널**을 제공 → AI 에이전트가 앱을 직접 구동 가능(REA와 동일한 MCP 생태계).
+- **공식 채널**: <https://getartcraft.com> · 소스/릴리스 <https://github.com/storytold> · Discord.
+- 언론(OMG! Ubuntu)은 PhotoCraft를 **"AI-built clone of Photoshop"** 으로 소개했습니다.
+
+### 13.2 상용 앱 ↔ Crafting App 대응표
+
+| 원본 상용 앱 | 오픈소스 재구현 | 분야 | 상태(대략) |
+| --- | --- | --- | --- |
+| Adobe Photoshop | **PhotoCraft** (포토크래프트) | 이미지 편집 | 얼리 알파 |
+| Adobe Illustrator | **VectorCraft** (벡터크래프트) | 벡터 일러스트 | 알파 |
+| Adobe Premiere Pro | FilmCraft | 영상 편집 | 개발 중 |
+| Adobe Lightroom | LightCraft | 사진 라이브러리·RAW | 얼리 알파 |
+| Adobe Acrobat | PdfCraft | PDF | 제공 |
+| Adobe After Effects | EffectCraft | 모션 그래픽·VFX | 개발 중 |
+| Adobe InDesign | DesignCraft | 페이지 레이아웃·출판 | 개발 중 |
+| Figma | FigCraft | UI 디자인·프로토타이핑 | 알파 |
+| Microsoft Word | WordCraft | 워드프로세서 | 제공 |
+| Avid Pro Tools | SoundCraft | 오디오(DAW) | 프리알파 |
+| Microsoft PowerPoint | DeckCraft | 프레젠테이션 | 알파 |
+| Autodesk AutoCAD | CADCraft | CAD·제도 | 알파 |
+| Microsoft Excel | GridCraft | 스프레드시트 | 제공 |
+
+### 13.3 주요 프로젝트 상세
+
+**PhotoCraft — Photoshop 대안**
+- 순수 Rust, 초기 알파(v0.8대). 레이어·마스크·조정 레이어·레이어 스타일·타입·벡터·브러시 + **실제 PSD 열기/저장**(공개 PSD 테스트 307/309 렌더 유지).
+- 34개 도구, 500+ 명령, 27 블렌드 모드, GPU 합성, 브라우저 WASM 빌드.
+- 자동화: `photocraft-cli`(헤드리스 배치) + **MCP 서버** + JSON 컨트롤 채널.
+- 소스: <https://github.com/storytold/photocraft>
+- ⚠️ `photocraft.my`, `photocraft.si`, `photocraft.one` 등 **비공식 미러가 다수** → 공식 GitHub/사이트만 이용.
+
+**VectorCraft — Illustrator 대안**
+- 순수 Rust(GitHub ★6.7k 수준). SVG/PDF(및 PDF/X) 읽기·쓰기, AI(PDF 호환) 읽기/쓰기(단, Illustrator 편집 데이터는 미포함), Affinity 파일 열기.
+- Pen·Pathfinder·Gradient Mesh·Envelope Distort·Outer Glow 등, SIMD 렌더(도형 2만 개 ≈27ms).
+- 자동화: `vectorcraft-cli mcp`(MCP 서버) + JSON 컨트롤 채널 + 헤드리스 배치 내보내기.
+- 소스: <https://github.com/storytold/vectorcraft>
+
+**그 외**: FilmCraft, LightCraft, PdfCraft, EffectCraft, DesignCraft, FigCraft, WordCraft, SoundCraft, DeckCraft, CADCraft, GridCraft. (개발 단계는 앱마다 다름)
+
+### 13.4 이 사례가 REA와 연결되는 지점
+
+- **같은 철학**: "대상 기능 분석 → 내 스택으로 재구현". REA 쇼케이스(DX-Ball 사운드팬 재구성, Notion 클립보드 브리지, TH04 탄환 링, Aegis OTP, CTF)와 동일한 목표.
+- **직접 만들고 싶다면**: REA로 대상 앱(예: Photoshop의 특정 기능)을 조사·이해 → 내 프로젝트에 재구현.
+- **이미 만들어진 결과물이 필요하면**: ArtCraft 같은 프로젝트를 사용/포크.
+- 두 진영 모두 MCP 기반이라, 필요하면 REA로 이들 오픈소스 앱 자체를 분석·확장할 수도 있습니다.
+
+### 13.5 전통적인 무료/오픈소스 대안 (참고)
+
+- **Photoshop 계열**: GIMP, Krita(디지털 페인팅), Photopea(브라우저), Paint.NET(Windows), PhotoGIMP.
+- **Illustrator 계열**: Inkscape, Graphite, Boxy SVG, Photopea.
+- **기타**: Blender(3D), DaVinci Resolve(영상·색보정), Scribus(출판), darktable·RawTherapee(RAW), LibreOffice(오피스), Canva.
+- Adobe 대안 큐레이션: <https://github.com/KenneyNL/Adobe-Alternatives>
+
+### 13.6 주의사항
+
+- 위 프로젝트는 **REA의 공식 산출물이 아니며 REA(morluto/rea)와 무관한 별도 팀의 결과물**입니다.
+- "클린룸 재구현"이란 공개 사양·문서·관찰에 기반한 독립 구현을 뜻하며, 원본의 소스코드나 자산을 복제해서는 안 됩니다.
+- 성능·완성도 비교 수치는 대개 **각 프로젝트 측의 주장**이며 독립 검증이 아닙니다.
+- 유사 이름의 비공식 미러/다운로드 사이트가 많으니 **공식 GitHub/사이트에서만** 내려받으세요.
+
+---
+
+## 14. 보안 · 면책
 
 - 분석은 **로컬 수행**되며 대상 앱을 업로드하지 않습니다. 다만 에이전트의 모델 provider는 자체 데이터 정책을 가집니다.
 - **합법적 연구·교육·상호운용성·소프트웨어 보존, 소유하거나 분석 권한이 있는 소프트웨어 분석**에만 사용하세요. (자세한 내용은 `DISCLAIMER.md`)
@@ -569,7 +642,7 @@ rea uninstall --purge-data # 추가로 REA 캐시/상태(~/.rea) 제거
 
 ---
 
-## 14. 한눈에 보는 요약 (Quick Reference)
+## 15. 한눈에 보는 요약 (Quick Reference)
 
 ```text
 # 1) 설치 & 설정
