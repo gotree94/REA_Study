@@ -1,5 +1,7 @@
 # REA (Reverse Engineer Anything) 사용법 & 환경 설정 가이드
 
+https://youtu.be/tByhXkxDKDo
+
 > 참고 저장소: <https://github.com/morluto/rea>
 > 공식 사이트: <https://rea.tools/> · 가이드: <https://rea.tools/guides/> · 쇼케이스: <https://rea.tools/showcase/>
 > npm 패키지: `rea-agents`
